@@ -1,0 +1,3 @@
+# settings
+INPUT_WIDTH = 640
+INPUT_HEIGHT = 640
