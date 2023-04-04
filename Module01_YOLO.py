@@ -3,17 +3,13 @@ import cv2
 from ModuleGlobal import *
 
 # LOAD YOLO MODEL
-
-
 def funcLoadYOLOModel(paramFilePath):
     net = cv2.dnn.readNetFromONNX(paramFilePath)
-    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
     return net
 
 # CONVERT IMAGE TO YOLO FORMAT
-
-
 def funcConvertImageToYOLO(paramImage):
     inputImage = paramImage.copy()
     row, col, d = inputImage.shape
@@ -33,8 +29,6 @@ def funcPredictFromYOLO(paramYOLO_FormatImage, paramNeuralNetwork, paramInputWid
     return detections
 
 # STEP 1 : GET OBJECT DETECTIONS
-
-
 def get_detections(paramInputImage, paramNeuralNetwork):
     # CONVERT IMAGE TO YOLO FORMAT
     YOLO_FormatImage = funcConvertImageToYOLO(paramInputImage)
@@ -46,8 +40,6 @@ def get_detections(paramInputImage, paramNeuralNetwork):
     return YOLO_FormatImage, detections
 
 # STEP 2 : FILTER DOWN THE OBJECT DETECTIONS TO THE BEST ONE
-
-
 def non_maximum_supression(input_image, detections):
     # FILTER DETECTIONS BASED ON CONFIDENCE AND PROBABILIY SCORE
     # center x, center y, w , h, conf, proba
