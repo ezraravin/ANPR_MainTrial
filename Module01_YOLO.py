@@ -3,6 +3,8 @@ import cv2
 from ModuleGlobal import *
 
 # LOAD YOLO MODEL
+
+
 def funcLoadYOLOModel(paramFilePath):
     net = cv2.dnn.readNetFromONNX(paramFilePath)
     net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -10,6 +12,8 @@ def funcLoadYOLOModel(paramFilePath):
     return net
 
 # CONVERT IMAGE TO YOLO FORMAT
+
+
 def funcConvertImageToYOLO(paramImage):
     inputImage = paramImage.copy()
     row, col, d = inputImage.shape
@@ -29,6 +33,8 @@ def funcPredictFromYOLO(paramYOLO_FormatImage, paramNeuralNetwork, paramInputWid
     return detections
 
 # STEP 1 : GET OBJECT DETECTIONS
+
+
 def get_detections(paramInputImage, paramNeuralNetwork):
     # CONVERT IMAGE TO YOLO FORMAT
     YOLO_FormatImage = funcConvertImageToYOLO(paramInputImage)
@@ -40,6 +46,8 @@ def get_detections(paramInputImage, paramNeuralNetwork):
     return YOLO_FormatImage, detections
 
 # STEP 2 : FILTER DOWN THE OBJECT DETECTIONS TO THE BEST ONE
+
+
 def non_maximum_supression(input_image, detections):
     # FILTER DETECTIONS BASED ON CONFIDENCE AND PROBABILIY SCORE
     # center x, center y, w , h, conf, proba
@@ -73,3 +81,20 @@ def non_maximum_supression(input_image, detections):
     index = np.array(cv2.dnn.NMSBoxes(
         boxes_np, confidences_np, 0.25, 0.45)).flatten()
     return boxes_np, confidences_np, index
+
+
+# STEP 3 : EXTRACT REGION OF INTEREST
+def drawings(image, boxes_np, confidences_np, index, param_ROIFileName):
+    # drawings
+    for ind in index:
+        x, y, w, h = boxes_np[ind]
+        bb_conf = confidences_np[ind]
+        conf_text = 'plate: {:.0f}%'.format(bb_conf*100)
+        imgRegionOfInterest = image[y:y+h, x:x+w]
+        cv2.imwrite(param_ROIFileName, imgRegionOfInterest)
+
+        cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 255), 2)
+        cv2.rectangle(image, (x, y-30), (x+w, y), (255, 0, 255), -1)
+        cv2.putText(image, conf_text, (x, y-10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
+    return image
