@@ -84,7 +84,7 @@ def non_maximum_supression(input_image, detections):
 
 
 # STEP 3 : EXTRACT REGION OF INTEREST
-def drawings(image, boxes_np, confidences_np, index, param_ROIFileName):
+def funcExtractRegionOfInterest(image, boxes_np, confidences_np, index, param_ROIFileName):
     # drawings
     for ind in index:
         x, y, w, h = boxes_np[ind]
