@@ -33,23 +33,26 @@ def yolo_predictions(img, modelYOLO):
     return result_img, text
 
 import tkinter as tk
-from tkinter import *
+import ttkbootstrap as ttk
 from PIL import ImageTk, Image
 
-root = tk.Tk()
-root.title('Automatic Number Plate Recognizer System')
-root.geometry('1000x1000')
-# Create a frame
-app = Frame(root, bg="white")
-app.pack(pady=10)
-# Create a label in the frame
-lmain = Label(app)
-lmain.pack()
-# Create another frame
-frameNumberPlate = Frame(root, bg="white")
-frameNumberPlate.pack()
-labelNumberPlate = Label(frameNumberPlate, text="Number Plate", font='Calibri 24 bold')
+window = ttk.Window()
+window.title('Automatic Number Plate Recognizer System')
+window.geometry('1000x1000')
+# Create a label in the window for video
+videoStreamFrame = tk.Label(master=window)
+
+# Label for photo streaming
+photoStreamFrame = tk.Label(master=window)
+
+# Create label for Number Plate Display
+labelNumberPlate = ttk.Label(master=window, text="Number Plate", font='Roboto 100 bold')
+
+# Pack and show widgets
+videoStreamFrame.pack(pady=20)
 labelNumberPlate.pack(pady=10, padx=10)
+photoStreamFrame.pack(pady=20)
+
 
 # Capture from camera
 cap = cv2.VideoCapture(0)
@@ -64,11 +67,17 @@ def video_stream():
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
-    lmain.imgtk = imgtk
-    lmain.configure(image=imgtk)
-    lmain.after(1, video_stream)
+    videoStreamFrame.imgtk = imgtk
+    videoStreamFrame.configure(image=imgtk)
+    imgROI_GUI = Image.open(imgROI_FileName)
+    imgROI_GUI_tk = ImageTk.PhotoImage(imgROI_GUI)
+    photoStreamFrame.imgtk = imgROI_GUI_tk
+    photoStreamFrame.configure(image=imgROI_GUI_tk)
+    photoStreamFrame.after(1, video_stream)
+
 
 video_stream()
+# photo_stream()
 
 # Loop
-root.mainloop()
+window.mainloop()
