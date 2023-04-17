@@ -8,21 +8,15 @@ import os
 from sklearn import tree
 from Module01_YOLO import *
 from Module02_TextRecognition import *
+from Module01_InitializeDatabase import *
 from imutils.object_detection import non_max_suppression
-import mysql.connector
-
-db = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='',
-    database='LicensePlateRecognition'
-)
-cursor = db.cursor()
 
 
 # %%
 # settings
 imgROI_FileName = "./roi/roi123.jpg"
+# Initialize Database
+db, cursor = initializeDatabase()
 
 # %%
 # LOAD YOLO MODEL (OBJECT DETECTION)
@@ -96,12 +90,19 @@ def video_stream():
     query = "INSERT INTO ParkingSystem(plate_number, vehicle_type) VALUES (%s, %s)"
     plateNumberData = (labelNumberPlate['text'], "Car")
     cursor.execute(query, plateNumberData)
-    db.commit()
+
+    # This will not work, cause you're streaming too much data,
+    # there needs to be some kind of Multi-Threading mechanics involved
+    # Where a process will be done a certain times first
+    # and a certain process only done once every few times after the prerequisite process triggers
+
+    # Thus the program is too heavy to be implemented with a database that is streamed to MySQL
+
+    # db.commit()
 
 
 video_stream()
 # db.commit()
-
 
 # Loop
 window.mainloop()
