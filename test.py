@@ -11,7 +11,6 @@ from Module02_TextRecognition import *
 from Module01_InitializeDatabase import *
 from imutils.object_detection import non_max_suppression
 
-
 # %%
 # settings
 imgROI_FileName = "./roi/roi123.jpg"
