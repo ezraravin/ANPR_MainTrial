@@ -84,12 +84,14 @@ def video_stream():
     imgROI_GUI_tk = ImageTk.PhotoImage(imgROI_GUI)
     photoStreamFrame.imgtk = imgROI_GUI_tk
     photoStreamFrame.configure(image=imgROI_GUI_tk)
-    photoStreamFrame.after(1, video_stream)
 
     # Insert to Database
     query = "INSERT INTO ParkingSystem(plate_number, vehicle_type) VALUES (%s, %s)"
     plateNumberData = (labelNumberPlate['text'], "Car")
     cursor.execute(query, plateNumberData)
+    db.commit()
+
+    photoStreamFrame.after(1, video_stream)
 
     # This will not work, cause you're streaming too much data,
     # there needs to be some kind of Multi-Threading mechanics involved
@@ -97,8 +99,6 @@ def video_stream():
     # and a certain process only done once every few times after the prerequisite process triggers
 
     # Thus the program is too heavy to be implemented with a database that is streamed to MySQL
-
-    # db.commit()
 
 
 video_stream()
