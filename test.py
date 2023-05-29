@@ -53,12 +53,17 @@ videoStreamFrame = tk.Label(master=window)
 photoStreamFrame = tk.Label(master=window)
 
 # Create label for Number Plate Display
+labelHeaderNumberPlate = ttk.Label(
+    master=window, text="Number Plate : ", font='Times 54 bold')
 labelNumberPlate = ttk.Label(
-    master=window, text="Number Plate", font='Roboto 100 bold')
+    master=window, text="Number Plate", font='Times 54 bold')
+labelStatus = ttk.Label(master=window, text="Status", font='Times 24 bold')
 
 # Pack and show widgets
 videoStreamFrame.pack(pady=20)
+labelHeaderNumberPlate.pack(pady=10, padx=10)
 labelNumberPlate.pack(pady=10, padx=10)
+labelStatus.pack(pady=10, padx=10)
 photoStreamFrame.pack(pady=20)
 
 
@@ -69,10 +74,12 @@ cap = cv2.VideoCapture(0)
 
 
 def video_stream():
+    flagDataMatch = False
     ret, frame = cap.read()
 
     results, text = yolo_predictions(frame, modelYOLO)
-    labelNumberPlate['text'] = text
+    # Fetch ANPR Data
+    textANPR = ' '.join(text)
 
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
@@ -84,11 +91,36 @@ def video_stream():
     photoStreamFrame.imgtk = imgROI_GUI_tk
     photoStreamFrame.configure(image=imgROI_GUI_tk)
 
-    # Insert to Database
-    query = "INSERT INTO ParkingSystem(plate_number, vehicle_type) VALUES (%s, %s)"
-    plateNumberData = (labelNumberPlate['text'], "Car")
-    cursor.execute(query, plateNumberData)
-    db.commit()
+    # Fetch Database Value FROM VehicleDB
+    cursor.execute("SELECT plate_number, vehicle_type FROM VehicleDB")
+    vehicleDB = cursor.fetchall()
+    # Fetch Database Value ParkingSystem
+    cursor.execute("SELECT plate_number, vehicle_type FROM ParkingSystem")
+    parkingDB = cursor.fetchall()
+
+    queryInsert = "INSERT INTO ParkingSystem(plate_number, vehicle_type) VALUES (%s, %s)"
+
+    # Compare Datas between two tables
+    for dataParkingDB in parkingDB:
+        if textANPR == dataParkingDB[0]:
+            flagDataMatch = True
+            break
+        else:
+            flagDataMatch = False
+
+    if flagDataMatch:
+        labelNumberPlate['text'] = textANPR
+        labelStatus['text'] = "Data is Found"
+    else:
+        for dataVehicleDB in vehicleDB:
+            strPlateNumberVehicleDB = ''.join(dataVehicleDB[0])
+            strVehicleType = ''.join(dataVehicleDB[1])
+            dataPlateNumberInsert = (strPlateNumberVehicleDB, strVehicleType)
+            if (strPlateNumberVehicleDB == textANPR):
+                cursor.execute(queryInsert, dataPlateNumberInsert)
+                db.commit()
+                labelStatus['text'] = "Data Added Successfully"
+                labelNumberPlate['text'] = textANPR
 
     photoStreamFrame.after(1, video_stream)
 
@@ -97,3 +129,4 @@ video_stream()
 
 # Loop
 window.mainloop()
+print("Data Added Successfully")
